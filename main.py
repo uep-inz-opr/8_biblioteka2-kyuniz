@@ -34,6 +34,8 @@ class Biblioteka:
         tytuly = map(lambda x: x.tytul, self.egzemplarze.keys())
         if not tytul in tytuly:
             return False
+        
+        
         elif len(list(tytuly)) > 3:
             return False
         elif nazwisko not in self.wypozyczenia.keys():
@@ -70,3 +72,4 @@ for i in range(0, liczba_akcji):
     elif (data[0] == ' oddaj '):
         print(biblioteka.oddaj(data[1], data[2]))
 
+#brak pomysłu
