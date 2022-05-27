@@ -15,6 +15,10 @@ class Ksiazka:
         return hash(len(self.tytul) * len(self.autor))
 
 
+def get_input():
+    return int(input())
+
+
 class Biblioteka:
     def __init__(self, egzemplarze: dict, limit_wypozyczen: int):
         self.limit_wypozyczen = limit_wypozyczen
@@ -32,18 +36,36 @@ class Biblioteka:
 
     def wypozycz(self, nazwisko, tytul) -> bool:
         tytuly = map(lambda x: x.tytul, self.egzemplarze.keys())
-        if not tytul in tytuly:
+        if tytul not in tytuly:
             return False
-        
-        
-        elif len(list(tytuly)) > 3:
+        elif self.obecna_liczba_egzemplarzy_dla(tytul) <= 0:
+            return False
+        elif len(list(tytuly)) > self.limit_wypozyczen:
             return False
         elif nazwisko not in self.wypozyczenia.keys():
             self.wypozyczenia[nazwisko] = [tytul]
+            self.zmniejsz_liczbe_dostepnych_egzemplarzy(tytul)
             return True
         else:
+            if self.czy_juz_posiada(tytul, nazwisko):
+                return False
             self.wypozyczenia[nazwisko].append(tytul)
+            self.zmniejsz_liczbe_dostepnych_egzemplarzy(tytul)
             return True
+
+    def zmniejsz_liczbe_dostepnych_egzemplarzy(self, tytul: str):
+        for ksiazka in self.egzemplarze.keys():
+            if ksiazka.tytul == tytul:
+                obecna_liczba_egzemplarzy = self.egzemplarze[ksiazka]
+                obecna_liczba_egzemplarzy -= 1
+                self.egzemplarze[ksiazka] = obecna_liczba_egzemplarzy
+
+    def zwieksz_liczbe_dostepnych_egzemplarzy(self, tytul: str):
+        for ksiazka in self.egzemplarze.keys():
+            if ksiazka.tytul == tytul:
+                obecna_liczba_egzemplarzy = self.egzemplarze[ksiazka]
+                obecna_liczba_egzemplarzy += 1
+                self.egzemplarze[ksiazka] = obecna_liczba_egzemplarzy
 
     def oddaj(self, nazwisko, tytul):
         tytuly = map(lambda x: x.tytul, self.egzemplarze.keys())
@@ -54,12 +76,21 @@ class Biblioteka:
         else:
             if tytul in self.wypozyczenia[nazwisko]:
                 self.wypozyczenia[nazwisko].remove(tytul)
+                self.zwieksz_liczbe_dostepnych_egzemplarzy(tytul)
                 return True
             else:
                 return False
 
+    def obecna_liczba_egzemplarzy_dla(self, tytul: str):
+        for ksiazka in self.egzemplarze.keys():
+            if ksiazka.tytul == tytul:
+                return self.egzemplarze[ksiazka]
+
+    def czy_juz_posiada(self, tytul:str, nazwisko:str):
+        return tytul in self.wypozyczenia[nazwisko]
+
 print('liczba akcji: ')
-liczba_akcji = int(input())
+liczba_akcji = get_input()
 
 biblioteka = Biblioteka({}, 3)
 
@@ -72,4 +103,3 @@ for i in range(0, liczba_akcji):
     elif (data[0] == ' oddaj '):
         print(biblioteka.oddaj(data[1], data[2]))
 
-#brak pomysłu
